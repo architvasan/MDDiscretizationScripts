@@ -177,6 +177,7 @@ if __name__ == "__main__":
         plot_method=None,
         device="cpu",
     )
+    autoencoder = LinearAETrainer(**autoencoder_params, verbose=1)
     output_path = Path(args.outpath)#"run-4")
     # Autoencoder outputs for each selection
     selection_run_path = output_path / "selection_runs"
@@ -256,8 +257,8 @@ if __name__ == "__main__":
         # shape (num_frames, num_sd4_subspaces)
 
         # Run autoencoder and save results
-        autoencoder = LinearAETrainer(**autoencoder_params)
-        autoencoder.fit(sd4_projection, output_path=selection_path / "autoencoder")
+        autoencoder = LinearAETrainer(**autoencoder_params, verbose=1)
+        autoencoder.fit(sd4_projection, output_path=selection_path / "autoencoder")#, verbose=True)
         z, _ = autoencoder.predict(sd4_projection)
         latent_spaces[selection] = z
         np.save(selection_path / "z.npy", z)
