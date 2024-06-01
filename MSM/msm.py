@@ -2,9 +2,32 @@ import numpy as np
 from deeptime.markov import TransitionCountEstimator
 import deeptime.markov as markov
 import matplotlib.pyplot as plt
+import argparse
+from pathlib import Path
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-t',
+                    '--trajdata',
+                    type=Path,
+                    help='Input trajectory data')
+
+parser.add_argument('-l',
+                    '--lagtime',
+                    type=int,
+                    help='lagtime')
+
+parser.add_argument('-o',
+                    '--output',
+                    type=Path,
+                    help='output directory')
+
+args = parser.parse_args()
+
+
+
 
 count_estimator = TransitionCountEstimator(
-    lagtime=5,
+    lagtime=args.lagtime,
     count_mode='sliding'
     )
 
@@ -13,11 +36,11 @@ msm_estimator = markov.msm.MaximumLikelihoodMSM(
                 stationary_distribution_constraint=None
                 )
 
-trajectory = np.loadtxt('output_data/dtrajs.dat').astype(int)
-msm = msm_estimator.fit(trajectory, lagtime=5).fetch_model()
+trajectory = np.loadtxt(args.trajdata).astype(int)
+msm = msm_estimator.fit(trajectory, lagtime=args.lagtime).fetch_model()
 
-np.savetxt('output_data/T_Mat.dat', msm.transition_matrix)
-np.savetxt('output_data/stationary.dat', msm.stationary_distribution)
+np.savetxt(f'{args.output}/T_Mat.dat', msm.transition_matrix)
+np.savetxt(f'{args.output}/stationary.dat', msm.stationary_distribution)
 print(f"Number of states: {msm.n_states}")
 
 import networkx as nx
@@ -40,18 +63,18 @@ nx.draw_networkx_nodes(G, pos, ax=ax)
 nx.draw_networkx_labels(G, pos, ax=ax, labels=nx.get_node_attributes(G, 'title'));
 nx.draw_networkx_edges(G, pos, ax=ax, arrowstyle='-|>',
                        connectionstyle='arc3, rad=0.3')
-plt.savefig('Images/network_view_highthresh.png')
+plt.savefig(f'{args.output}/network_view_highthresh.png')
 plt.close()
 
 pcca = msm.pcca(n_metastable_sets=6)
 print(f"Memberships: {pcca.memberships.shape}")
 print(pcca.coarse_grained_stationary_probability)
-np.savetxt('pcca_probs.dat', pcca.coarse_grained_stationary_probability)
+np.savetxt(f'{args.output}/pcca_probs.dat', pcca.coarse_grained_stationary_probability)
 print("Metastable distributions shape:", pcca.metastable_distributions.shape)
 print(pcca.coarse_grained_transition_matrix)
 
-np.savetxt('output_data/pcca_assignments.dat', np.array([int(p_as) for p_as in pcca.assignments]).T)
-np.savetxt('output_data/pcca_coarse_grained_TMat.dat', pcca.coarse_grained_transition_matrix)
+np.savetxt(f'{args.output}/pcca_assignments.dat', np.array([int(p_as) for p_as in pcca.assignments]).T)
+np.savetxt(f'{args.output}/pcca_coarse_grained_TMat.dat', pcca.coarse_grained_transition_matrix)
 
 
 threshold = 1e-9
@@ -73,5 +96,5 @@ nx.draw_networkx_labels(G, pos, ax=ax, labels=nx.get_node_attributes(G, 'title')
 nx.draw_networkx_edges(G, pos, ax=ax, arrowstyle='-|>',
                        connectionstyle='arc3, rad=0.3')
 
-plt.savefig('Images/pcca_network_view.png')
+plt.savefig(f'{args.output}/pcca_network_view.png')
 plt.close()
