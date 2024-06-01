@@ -11,7 +11,7 @@ def show_scatter(data: np.ndarray, color: np.ndarray, output: str):
     ff = ax.scatter(data[:, 0], data[:, 1], data[:, 2], c=color)
     #ax.view_init(90, 90, 90)
     plt.colorbar(ff)
-    plt.savefig(output)
+    plt.savefig(output, dpi=300)
     plt.close()
 
 
@@ -65,12 +65,12 @@ for i in range(dihedrals.shape[1]):
     dihedral_test = dihedrals[:,i,0]
 
 plt.plot(dihedral_test[::100])
-plt.savefig(f'{args.output}/cos_dihedral_test.png')
+plt.savefig(f'{args.output}/cos_dihedral_test.png', dpi=300)
 plt.close()
 
 S = np.load(args.Sdata)
 plt.semilogy(S, "ro-")
-plt.savefig(f'{args.output}/S.png')
+plt.savefig(f'{args.output}/S.png', dpi=300)
 plt.close()
 
 e_rmsd = np.load(args.ermsd)
